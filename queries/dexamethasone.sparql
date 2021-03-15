@@ -1,0 +1,85 @@
+PREFIX vodan: <http://purl.org/vodan/whocovid19crfsemdatamodel/>
+PREFIX vodan_inst: <http://purl.org/vodan/whocovid19crfsemdatamodel/instances/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT 
+  (COUNT(?crf000) AS ?total_000)
+  (COUNT(?crf001) AS ?total_001)
+  (COUNT(?crf010) AS ?total_010)
+  (COUNT(?crf011) AS ?total_011)
+  (COUNT(?crf100) AS ?total_100)
+  (COUNT(?crf101) AS ?total_101)
+  (COUNT(?crf110) AS ?total_110)
+  (COUNT(?crf111) AS ?total_111)
+WHERE {
+  ?crf a vodan:who-covid-19-rapid-crf ;
+    obo:BFO_0000051 [
+      a vodan:Module_1 ;
+      obo:BFO_0000051 [
+        a vodan:Medication ;
+        obo:BFO_0000051 [
+          a vodan:Corticosteroid ;
+          vodan:has_value ?dexamethasone ;
+        ] ;
+      ] ;
+      obo:BFO_0000051 [
+        a vodan:Supportive_care ;
+        obo:BFO_0000051 [
+          a vodan:ICU_admission ;
+          vodan:has_value ?severity ;
+        ] ;
+      ] ;
+      obo:BFO_0000051 [
+        a vodan:Laboratory_results ;
+        obo:BFO_0000051 [
+          a vodan:PGE2 ;
+          vodan:has_literal_value ?pge2_level ;
+        ] ;
+      ] ;
+    ].
+  
+  BIND(vodan_inst:C49487 as ?no)
+  BIND(vodan_inst:C49488 as ?yes)
+  BIND(0.95 as ?threshold)
+  
+  { # 000
+    BIND (?crf as ?crf000)
+    FILTER ( ?severity = ?no && ?dexamethasone = ?no && ?pge2_level < ?threshold )
+  }
+  UNION
+  { # 001
+    BIND (?crf as ?crf001)
+    FILTER ( ?severity = ?no && ?dexamethasone = ?no && ?pge2_level >= ?threshold )
+  }
+  UNION
+  { # 010
+    BIND (?crf AS ?crf010)
+    FILTER ( ?severity = ?no && ?dexamethasone = ?yes && ?pge2_level < ?threshold )
+  }
+  UNION
+  { # 011
+    BIND (?crf AS ?crf011)
+    FILTER ( ?severity = ?no && ?dexamethasone = ?yes && ?pge2_level >= ?threshold )
+  }
+  UNION
+  { # 100
+    BIND (?crf AS ?crf100)
+    FILTER ( ?severity = ?yes && ?dexamethasone = ?no && ?pge2_level < ?threshold )
+  }
+  UNION
+  { # 101
+    BIND (?crf AS ?crf101)
+    FILTER ( ?severity = ?yes && ?dexamethasone = ?no && ?pge2_level >= ?threshold )
+  }
+  UNION
+  { # 110
+    BIND (?crf AS ?crf110)
+    FILTER ( ?severity = ?yes && ?dexamethasone = ?yes && ?pge2_level < ?threshold )
+  }
+  UNION
+  { # 111
+    BIND (?crf AS ?crf111)
+    FILTER ( ?severity = ?yes && ?dexamethasone = ?yes && ?pge2_level >= ?treshold )
+  }
+}
